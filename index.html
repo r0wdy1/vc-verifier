@@ -1,0 +1,24 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Войти</title>
+    <link href="index.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Чтобы продолжить, докажите, что вам больше 18 лет</h1>
+      <button id="signButton">Войти</button>
+    </div>
+
+    <script>
+      document
+        .getElementById("signButton")
+        .addEventListener("click", function () {
+          window.open("did://wallet.com/login", "_blank");
+        });
+    </script>
+  </body>
+</html>
