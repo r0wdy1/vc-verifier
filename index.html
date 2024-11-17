@@ -14,10 +14,28 @@
     </div>
 
     <script>
+      var sessionId = "";
+
+      function getSessionId() {
+        fetch(window.location + "session-id", {
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            sessionId = data.sessionId;
+            document.getElementById(
+              "signButton"
+            ).href = `did://wallet.com/login?id=${sessionId}`;
+          })
+          .catch((error) => console.error("Error fetching session ID:", error));
+      }
+
+      window.onload = getSessionId()
+
       document
         .getElementById("signButton")
         .addEventListener("click", function () {
-          window.open("did://wallet.com/login", "_blank");
+          window.open(`did://wallet.com/login?id=${sessionId}`, "_blank");
         });
     </script>
   </body>
