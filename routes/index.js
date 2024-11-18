@@ -3,20 +3,22 @@ const router = express.Router();
 
 const snarkJS = require("snarkjs");
 const fs = require("fs");
+const snarkjs = require("snarkjs");
 
-const Gpio = require('onoff').Gpio;
+const Gpio = function (){}//require('onoff').Gpio;
 
-let verificationResult= null;
-//setTimeout(() => {verificationResult = true}, 10000);
-const LED = new Gpio(65, 'out');
+let verificationResult = null;
+const LED = new Gpio(64, 'out');
 const solenoid = new Gpio(75, 'out');
 
-router.get('/open', (req, res) => {
+router.post('/open', (req, res) => {
   if (solenoid.readSync() === 0) {
     solenoid.writeSync(1);
-    setTimeout(() => { solenoid.writeSync(0); }, 1000);
+    setTimeout(() => {
+      solenoid.writeSync(0);
+    },1000);
   }
-	solenoid.unexport();
+  solenoid.unexport();
 });
 
 router.post('/', (req, res) => {
@@ -26,6 +28,21 @@ router.post('/', (req, res) => {
   verify(proof, publicSignals, res).then(r => {
     console.log(r);
   });
+});
+
+router.post('/verify', (req, res) => {
+  const proof = req.body.proof;
+  const publicSignals = req.body.publicSignals;
+
+  verify(proof, publicSignals, req, res).then(r => {
+    console.log(r);
+  });
+});
+
+router.get('/session-id', (req, res) => {
+  const sessionId = req.cookies['connect.sid'];
+
+  res.json({sessionId:sessionId})
 });
 
 router.get('/verify', (req, res) => {
@@ -49,8 +66,7 @@ router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-async function verify(proof, publicSignals, res) {
-
+async function verify(proof, publicSignals, req, res) {
   let formattedPublicSignals, vKey;
 
   try {
@@ -60,39 +76,32 @@ async function verify(proof, publicSignals, res) {
   }
 
   try {
-    const CombinedCheck_vkey = fs.readFileSync("../lib/CombinedCheck_vkey.json", { encoding: 'utf8' });
+    const CombinedCheck_vkey = fs.readFileSync("../CombinedCheck_vkey.json", { encoding: 'utf8' });
     vKey = JSON.parse(CombinedCheck_vkey);
   } catch (error) {
     return res.status(400).json({ error: 'Invalid CombinedCheck_vkey format' });
   }
 
-  const result = await snarkJS.groth16.verify(vKey, formattedPublicSignals, proof);
+  try {
+    const result = await snarkjs.groth16.verify(vKey, formattedPublicSignals, proof);
 
-  verificationResult = result;
+    req.session.verificationResult = result;
+    if (result === true) {
+      //blinkLed() //blink LED on RaspberryPi
 
-  if (result === true) {
-    res.json({ valid: true });
-    console.log("Proof is valid!")
-    LED.writeSync(1);
-    setTimeout(function () {
-      LED.writeSync(0)
-    }, 3000)
-  } else {
-    res.json({ valid: false });
-    // res.status(400).json({ error: 'Invalid proof' });
-    console.log("Proof is invalid!");
+      res.json({ valid: true });
+      console.log("Proof is valid!")
+      console.log(req.sessionID)
+
+    } else {
+      res.json({ valid: false });
+      // res.status(400).json({ error: 'Invalid proof' });
+      console.log("Proof is invalid!");
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Verification failed" });
+    console.error("Verification error:", error);
   }
 }
-
-
-process.on("beforeExit", (code) => {
-  console.log('BeforeExit code: ', code);
-
-  solenoid.writeSync(0);
-  solenoid.unexport();
-
-  LED.writeSync(0);
-  LED.unexport();
-});
 
 module.exports = router;

@@ -1,0 +1,15 @@
+[Unit]
+Description=Passport
+After=
+Requires=
+
+[Service]
+Type=simple
+WorkingDirectory=/home/orangepi/Downloads/vc_verifier
+ExecStart=/usr/bin/node /home/orangepi/Downloads/vc_verifier/bin/www
+ExecReload=/usr/bin/service vc_verifier.service stop && /usr/bin/service vc_verifier.service start
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

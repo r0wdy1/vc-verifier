@@ -3,6 +3,7 @@ async function checkVerificationStatus() {
     try {
         const response = await fetch('/verify', {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -13,8 +14,6 @@ async function checkVerificationStatus() {
 
         const lockIcon = document.querySelector('svg.icon_lock');
         const unlockIcon = document.querySelector('svg.icon_unlock');
-
-	lockIcon.onclick = () => { fetch('open').then(()=>{});  }
 
         const reset = () => {
             resultElement.textContent = "Начните валидацию или ожидаете проверку...";
