@@ -83,7 +83,7 @@ async function verify(proof, publicSignals, req, res) {
     return res.status(400).json({ error: 'Invalid publicSignals format' });
   }
 
-  const vKey = JSON.parse(fs.readFileSync("../circuits/compiled/CombinedCheck_vkey.json"))
+  const vKey = JSON.parse(fs.readFileSync("./CombinedCheck_vkey.json"))
 
   try {
     const result = await snarkjs.groth16.verify(vKey, formattedPublicSignals, proof);
