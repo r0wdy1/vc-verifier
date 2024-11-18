@@ -4,7 +4,7 @@ const router = express.Router();
 const snarkJS = require("snarkjs");
 const fs = require("fs");
 const snarkjs = require("snarkjs");
-
+const  path = require('path');
 const Gpio = function (){}//require('onoff').Gpio;
 
 let verificationResult = null;
@@ -35,7 +35,7 @@ router.post('/verify', (req, res) => {
   const publicSignals = req.body.publicSignals;
 
   verify(proof, publicSignals, req, res).then(r => {
-    console.log(r);
+    // console.log(r);
   });
 });
 
@@ -50,12 +50,16 @@ router.get('/verify', (req, res) => {
    * Замки
    */
   if (verificationResult === true) {
-    if (solenoid.readSync() === 0) {
+    console.log(solenoid);
+    if (solenoid.readSync && solenoid.readSync() === 0) {
       solenoid.writeSync(1);
       setTimeout(() => {
         solenoid.writeSync(0);
       },1000);
     }
+  }
+  if (verificationResult) {
+    console.log("returning verificationResult=",verificationResult)
   }
   res.json({ valid: verificationResult });
   // Reset
@@ -65,6 +69,9 @@ router.get('/verify', (req, res) => {
 router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+router.get('/result', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/result.html'));
+});
 
 async function verify(proof, publicSignals, req, res) {
   let formattedPublicSignals, vKey;
@@ -72,27 +79,30 @@ async function verify(proof, publicSignals, req, res) {
   try {
     formattedPublicSignals = JSON.parse(publicSignals);
   } catch (error) {
+    console.error("Invalid publicSignals format");
     return res.status(400).json({ error: 'Invalid publicSignals format' });
   }
 
   try {
-    const CombinedCheck_vkey = fs.readFileSync("../CombinedCheck_vkey.json", { encoding: 'utf8' });
+    const CombinedCheck_vkey = fs.readFileSync(path.join(__dirname, '../CombinedCheck_vkey.json'), { encoding: 'utf8' });
     vKey = JSON.parse(CombinedCheck_vkey);
   } catch (error) {
+    console.error("Invalid CombinedCheck_vkey format", error);
     return res.status(400).json({ error: 'Invalid CombinedCheck_vkey format' });
   }
 
   try {
     const result = await snarkjs.groth16.verify(vKey, formattedPublicSignals, proof);
-
+    // console.warn("verificationResult HERE")
     req.session.verificationResult = result;
+
     if (result === true) {
       //blinkLed() //blink LED on RaspberryPi
 
       res.json({ valid: true });
       console.log("Proof is valid!")
       console.log(req.sessionID)
-
+      verificationResult = true;
     } else {
       res.json({ valid: false });
       // res.status(400).json({ error: 'Invalid proof' });
