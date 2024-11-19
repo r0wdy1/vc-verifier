@@ -20,10 +20,15 @@ const unlock = () => {
   if (solenoid.readSync && solenoid.readSync() === 0) {
     solenoid.writeSync(1);
     console.log("solenoid received 1");
-    // setTimeout(() => {
-    //   solenoid.writeSync(0);
-    //   solenoid.unexport();
-    // }, 1000);
+    setTimeout(() => {
+      solenoid.writeSync(0);
+      //   solenoid.unexport();
+    }, 1000);
+  } else if (!solenoid.readSync) {
+    console.error("SOLENOID IS UNDEFINED");
+    console.error(solenoid);
+  } else if (solenoid.readSync() !== 0) {
+    console.error("SOLENOID!==0");
   }
 };
 router.post("/open", (req, res) => {
