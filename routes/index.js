@@ -21,9 +21,9 @@ const unlock = () => {
     solenoid.writeSync(1);
     setTimeout(() => {
       solenoid.writeSync(0);
+      solenoid.unexport();
     }, 1000);
   }
-  solenoid.unexport();
 };
 router.post("/open", (req, res) => {
   unlock();
