@@ -8,25 +8,30 @@ const path = require("path");
 const os = require("os");
 const { platform } = require("process");
 
-const Gpio = function () {};
-if (os.platform() === "linux") {
-  const Gpio = require("onoff").Gpio;
-}
+const GPID_DEFAULT = function () {
+  return {
+    readSync: () => {
+      return 0;
+    },
+    writeSync: () => {},
+  };
+};
+
+const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
+
+const solenoid = new GPIO(75, "out");
 
 let verificationResult = null;
-const LED = new Gpio(64, "out");
+
 const unlock = () => {
-  const solenoid = new Gpio(75, "out");
-  if (solenoid.readSync && solenoid.readSync() === 0) {
+  if (solenoid.readSync() === 0) {
+    console.log("solenoid status =", solenoid.readSync());
     solenoid.writeSync(1);
     console.log("solenoid received 1");
     setTimeout(() => {
       solenoid.writeSync(0);
       //   solenoid.unexport();
     }, 1000);
-  } else if (!solenoid.readSync) {
-    console.error("SOLENOID IS UNDEFINED");
-    console.error(solenoid);
   } else if (solenoid.readSync() !== 0) {
     console.error("SOLENOID!==0");
   }
