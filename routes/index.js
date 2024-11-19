@@ -26,7 +26,13 @@ const unlock = () => {
   }
 };
 router.post("/open", (req, res) => {
-  unlock();
+  try {
+    unlock();
+    res.status(200).send();
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: e.toString() });
+  }
 });
 
 router.post("/", (req, res) => {
@@ -58,7 +64,13 @@ router.get("/verify", (req, res) => {
    * Замки
    */
   if (verificationResult === true) {
-    unlock();
+    try {
+      unlock();
+      res.status(200).send();
+    } catch (e) {
+      console.error(e);
+      res.status(500).send({ error: e.toString() });
+    }
   }
   if (verificationResult) {
     console.log("returning verificationResult=", verificationResult);
