@@ -5,7 +5,13 @@ const snarkJS = require("snarkjs");
 const fs = require("fs");
 const snarkjs = require("snarkjs");
 const path = require("path");
-const Gpio = require("onoff").Gpio;
+const os = require("os");
+const { platform } = require("process");
+
+const Gpio = function () {};
+if (os.platform() === "linux") {
+  const Gpio = require("onoff").Gpio;
+}
 
 let verificationResult = null;
 const LED = new Gpio(64, "out");
