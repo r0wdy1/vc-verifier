@@ -19,10 +19,11 @@ const unlock = () => {
   const solenoid = new Gpio(75, "out");
   if (solenoid.readSync && solenoid.readSync() === 0) {
     solenoid.writeSync(1);
-    setTimeout(() => {
-      solenoid.writeSync(0);
-      solenoid.unexport();
-    }, 1000);
+    console.log("solenoid received 1");
+    // setTimeout(() => {
+    //   solenoid.writeSync(0);
+    //   solenoid.unexport();
+    // }, 1000);
   }
 };
 router.post("/open", (req, res) => {
