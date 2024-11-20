@@ -1,0 +1,73 @@
+.hal {
+  width: 40%;
+  margin-top: 5%;
+  margin-left: 30%;
+}
+.container {
+  /* width: 50%; */
+  /* align-items: center;
+  display: flex;
+  flex-direction: column; */
+  display: inline-block;
+}
+/* .hidden {
+    visibility: hidden;
+} */
+body {
+  padding: 0;
+  font:
+    14px "Lucida Grande",
+    Helvetica,
+    Arial,
+    sans-serif;
+  background-color: #697499;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+svg {
+  /* position: absolute; */
+  width: 15rem;
+  height: 15rem;
+  top: -9rem;
+  bottom: 0;
+  margin: auto;
+  fill: #505050;
+}
+
+.qr {
+  width: 20%;
+}
+
+.speech-bubble {
+  display: inline-block;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 10px;
+  padding-right: 20px;
+  padding-left: 20px;
+  width: 200px; /* Adjust bubble size */
+  box-shadow: 14px 11px 5px rgba(0, 0, 0, 0.3);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 24;
+  margin-top: -15%; /* Move the bubble up */
+  margin-left: 25%; /* Move the bubble slightly to the left */
+}
+
+.speech-bubble::after {
+  content: "";
+  display: block;
+  width: 220px;
+  height: 9;
+  border: 10px solid transparent;
+  border-top-color: #fff; /* Match bubble background */
+  margin: 0 auto;
+  position: relative;
+  top: 29px;
+}

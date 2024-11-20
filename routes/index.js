@@ -28,10 +28,14 @@ const unlock = () => {
     console.log("solenoid status =", solenoid.readSync());
     solenoid.writeSync(1);
     console.log("solenoid received 1");
+    verificationResult = true;
     setTimeout(() => {
       solenoid.writeSync(0);
       //   solenoid.unexport();
     }, 1000);
+    setTimeout(() => {
+      verificationResult = null;
+    }, 5000);
   } else if (solenoid.readSync() !== 0) {
     console.error("SOLENOID!==0");
   }
@@ -61,6 +65,13 @@ router.post("/verify", (req, res) => {
 
   verify(proof, publicSignals, req, res).then((r) => {
     // console.log(r);
+    try {
+      unlock();
+      res.status(200);
+    } catch (e) {
+      console.error(e);
+      res.status(500).send({ error: e.toString() });
+    }
   });
 });
 
@@ -74,20 +85,20 @@ router.get("/verify", (req, res) => {
   /**
    * Замки
    */
-  if (verificationResult === true) {
-    try {
-      unlock();
-    } catch (e) {
-      console.error(e);
-      res.status(500).send({ error: e.toString() });
-    }
-  }
-  if (verificationResult) {
-    console.log("returning verificationResult=", verificationResult);
-  }
+  // if (verificationResult === true) {
+  //   try {
+  //     unlock();
+  //   } catch (e) {
+  //     console.error(e);
+  //     res.status(500).send({ error: e.toString() });
+  //   }
+  // }
+  // if (verificationResult) {
+  //   console.log("returning verificationResult=", verificationResult);
+  // }
   res.json({ valid: verificationResult });
   // Reset
-  verificationResult = null;
+  // verificationResult = null;
 });
 
 router.get("/", (req, res) => {
@@ -133,7 +144,6 @@ async function verify(proof, publicSignals, req, res) {
       res.json({ valid: true });
       console.log("Proof is valid!");
       console.log(req.sessionID);
-      verificationResult = true;
     } else {
       res.json({ valid: false });
       // res.status(400).json({ error: 'Invalid proof' });
