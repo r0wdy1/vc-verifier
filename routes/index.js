@@ -17,9 +17,9 @@ const GPID_DEFAULT = function () {
   };
 };
 
-const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
+// const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
 
-const solenoid = new GPIO(75, "out");
+// const solenoid = new GPIO(75, "out");
 
 let verificationResult = null;
 
@@ -111,16 +111,16 @@ router.get("/result", (req, res) => {
 async function verify(proof, publicSignals, req, res) {
   let formattedPublicSignals, vKey;
 
-  try {
-    formattedPublicSignals = JSON.parse(publicSignals);
-  } catch (error) {
-    console.error("Invalid publicSignals format");
-    return res.status(400).json({ error: "Invalid publicSignals format" });
-  }
+  // try {
+  //   formattedPublicSignals = JSON.parse(publicSignals);
+  // } catch (error) {
+  //   console.error("Invalid publicSignals format");
+  //   return res.status(400).json({ error: "Invalid publicSignals format" });
+  // }
 
   try {
     const CombinedCheck_vkey = fs.readFileSync(
-      path.join(__dirname, "../CombinedCheck_vkey.json"),
+      path.join(__dirname, "../PassportVerifierP256_64x4_736_vkey.json"),
       { encoding: "utf8" },
     );
     vKey = JSON.parse(CombinedCheck_vkey);
@@ -132,7 +132,7 @@ async function verify(proof, publicSignals, req, res) {
   try {
     const result = await snarkjs.groth16.verify(
       vKey,
-      formattedPublicSignals,
+      publicSignals,
       proof,
     );
     // console.warn("verificationResult HERE")
