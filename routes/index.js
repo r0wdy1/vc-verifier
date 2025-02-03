@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-const snarkJS = require("snarkjs");
 const fs = require("fs");
 const snarkjs = require("snarkjs");
 const path = require("path");
@@ -13,13 +12,13 @@ const GPID_DEFAULT = function () {
     readSync: () => {
       return 0;
     },
-    writeSync: () => {},
+    writeSync: () => { },
   };
 };
 
 // const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
 
-// const solenoid = new GPIO(75, "out");
+const solenoid = new GPIO(75, "out");
 
 let verificationResult = null;
 
@@ -40,83 +39,61 @@ const unlock = () => {
     console.error("SOLENOID!==0");
   }
 };
-router.post("/open", (req, res) => {
-  try {
-    unlock();
-    res.status(200).send();
-  } catch (e) {
-    console.error(e);
-    res.status(500).send({ error: e.toString() });
-  }
-});
 
-router.post("/", (req, res) => {
+// router.post("/open", (req, res) => {
+//   try {
+//     // unlock();
+//     res.status(200).send();
+//   } catch (e) {
+//     console.error(e);
+//     res.status(500).send({ error: e.toString() });
+//   }
+// });
+
+// router.post("/", (req, res) => {
+//   const proof = req.body.proof;
+//   const publicSignals = req.body.publicSignals;
+
+//   verify(proof, publicSignals, res).then((r) => {
+//     console.log(r);
+//   });
+// });
+
+router.post('/verify', (req, res) => {
   const proof = req.body.proof;
   const publicSignals = req.body.publicSignals;
 
-  verify(proof, publicSignals, res).then((r) => {
-    console.log(r);
-  });
+  verify(proof, publicSignals, req, res);
 });
 
-router.post("/verify", (req, res) => {
-  const proof = req.body.proof;
-  const publicSignals = req.body.publicSignals;
+router.get('/session-id', (req, res) => {
+  const sessionId = req.cookies['connect.sid'];
 
-  verify(proof, publicSignals, req, res).then((r) => {
-    // console.log(r);
-    try {
-      unlock();
-      res.status(200);
-    } catch (e) {
-      console.error(e);
-      res.status(500).send({ error: e.toString() });
-    }
-  });
-});
-
-router.get("/session-id", (req, res) => {
-  const sessionId = req.cookies["connect.sid"];
-
-  res.json({ sessionId: sessionId });
+  res.json({ sessionId: sessionId })
 });
 
 router.get("/verify", (req, res) => {
-  /**
-   * Замки
-   */
-  // if (verificationResult === true) {
-  //   try {
-  //     unlock();
-  //   } catch (e) {
-  //     console.error(e);
-  //     res.status(500).send({ error: e.toString() });
-  //   }
-  // }
-  // if (verificationResult) {
-  //   console.log("returning verificationResult=", verificationResult);
-  // }
-  res.json({ valid: verificationResult });
-  // Reset
-  // verificationResult = null;
+  if (req.session.verificationResult === undefined) {
+    return res.json({ valid: "none" });} 
+  if (req.session.verificationResult == false) {
+    return res.json({ valid: "no" });
+  } else {
+    unlock
+    return res.json({ valid: "yes" });
+  }
 });
 
-router.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
-router.get("/result", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/result.html"));
+router.get('/result', (req, res) => {
+  console.log(req.sessionID)
+  res.sendFile(path.join(__dirname, '../public/result.html'));
 });
 
+router.get('/', (req, res) => {
+  req.session.verificationResult = verificationResult || 0;
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 async function verify(proof, publicSignals, req, res) {
-  let formattedPublicSignals, vKey;
-
-  // try {
-  //   formattedPublicSignals = JSON.parse(publicSignals);
-  // } catch (error) {
-  //   console.error("Invalid publicSignals format");
-  //   return res.status(400).json({ error: "Invalid publicSignals format" });
-  // }
+  let vKey;
 
   try {
     const CombinedCheck_vkey = fs.readFileSync(
@@ -135,15 +112,13 @@ async function verify(proof, publicSignals, req, res) {
       publicSignals,
       proof,
     );
-    // console.warn("verificationResult HERE")
     req.session.verificationResult = result;
 
     if (result === true) {
       //blinkLed() //blink LED on RaspberryPi
-
       res.json({ valid: true });
-      console.log("Proof is valid!");
-      console.log(req.sessionID);
+      console.log("Proof is valid!")
+      console.log(req.sessionID)
     } else {
       res.json({ valid: false });
       // res.status(400).json({ error: 'Invalid proof' });
