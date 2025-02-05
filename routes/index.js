@@ -17,10 +17,9 @@ const GPID_DEFAULT = function () {
   };
 };
 
-// const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
+const GPIO = os.platform() === "linux" ? require("onoff").Gpio : GPID_DEFAULT;
 
-// const solenoid = new GPIO(75, "out");
-
+const solenoid = new GPIO(75, "out");
 let verificationResult = null;
 
 const unlock = () => {
@@ -40,6 +39,11 @@ const unlock = () => {
     console.error("SOLENOID!==0");
   }
 };
+
+// const unlock = () => {
+//   console.log("unlocked!")
+// }
+
 router.post("/open", (req, res) => {
   try {
     unlock();
@@ -126,7 +130,7 @@ async function verify(proof, publicSignals, req, res) {
     vKey = JSON.parse(CombinedCheck_vkey);
   } catch (error) {
     console.error("Invalid CombinedCheck_vkey format", error);
-    return res.status(400).json({ error: "Invalid CombinedCheck_vkey format" });
+    return res.status(400).json({ error: "Invalid PassportVerifierP256 format" });
   }
 
   try {
