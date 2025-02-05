@@ -16,11 +16,11 @@ async function checkVerificationStatus() {
     const unlockIcon = document.querySelector("svg.icon_unlock");
 
     const reset = () => {
-      // resultElement.textContent = "Начните валидацию или ожидаете проверку...";
-      // resultElement.style.color = "black";
-      // lockIcon.classList.toggle("hidden", false);
-      // lockIcon.classList.toggle("lock", false);
-      // unlockIcon.classList.toggle("unlock", false);
+      resultElement.textContent = "Начните валидацию или ожидаете проверку...";
+      resultElement.style.color = "black";
+      lockIcon.classList.toggle("hidden", false);
+      lockIcon.classList.toggle("lock", false);
+      unlockIcon.classList.toggle("unlock", false);
     };
 
     if (data.valid || window.result) {
@@ -47,4 +47,4 @@ async function checkVerificationStatus() {
   }
 }
 
-setInterval(checkVerificationStatus, 5000);
+setInterval(checkVerificationStatus, 2500);
