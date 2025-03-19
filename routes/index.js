@@ -105,6 +105,20 @@ router.get("/verify", (req, res) => {
   // verificationResult = null;
 });
 
+router.get("/apk", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/apk.html"));
+});
+
+router.get("/download-apk", (req, res) => {
+  const apkPath = path.join(__dirname, "../public/did.apk");
+  res.download(apkPath, "did.apk", (err) => {
+    if (err) {
+      console.error("Error serving APK:", err);
+      res.status(500).send({ error: "Failed to download APK" });
+    }
+  });
+});
+
 router.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
